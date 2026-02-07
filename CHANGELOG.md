@@ -6,6 +6,17 @@
 
 ---
 
+## [1.4] — 2026-02-07 — Import 182 Clients
+
+### Base de données (Supabase)
+- Migration `contacts` : +`raison_sociale`, `prenom` nullable, +`fichier_source` (25 colonnes)
+- Import 182 clients (142 personnes + 41 sociétés)
+- Statut mappé : "signé" → "actif"
+- Top villes : Genève (56), Nyon (10), Conches (7), Anières (7)
+- Doublon détecté et corrigé
+
+---
+
 ## [1.3] — 2026-02-07 — Taxonomie Assurances Suisses
 
 ### Base de données (Supabase — ranchin.net)
