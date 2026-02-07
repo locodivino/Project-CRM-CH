@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { TopHeader } from "@/components/layout/TopHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -10,18 +12,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Upload, Search, Filter, MoreHorizontal } from "lucide-react";
-
-const contacts = [
-  { id: 1, name: "Jean Dupont", email: "jean.dupont@gmail.com", phone: "+41 79 123 45 67", tags: ["VIP", "LAMal"], status: "Actif" },
-  { id: 2, name: "Marie Martin", email: "marie.martin@bluewin.ch", phone: "+41 78 234 56 78", tags: ["Client"], status: "Actif" },
-  { id: 3, name: "Pierre Durand", email: "p.durand@sunrise.ch", phone: "+41 76 345 67 89", tags: ["Prospect"], status: "Actif" },
-  { id: 4, name: "Sophie Bernard", email: "sophie.b@gmail.com", phone: "+41 79 456 78 90", tags: ["Client", "3ème Pilier"], status: "Actif" },
-  { id: 5, name: "Marc Favre", email: "marc.favre@outlook.com", phone: "+41 78 567 89 01", tags: ["VIP"], status: "Actif" },
-  { id: 6, name: "Claire Rochat", email: "claire.rochat@gmail.com", phone: "+41 76 678 90 12", tags: ["Prospect"], status: "En attente" },
-  { id: 7, name: "Luc Bonvin", email: "luc.bonvin@bluewin.ch", phone: "+41 79 789 01 23", tags: ["Client", "Auto"], status: "Actif" },
-  { id: 8, name: "Anne Chevalier", email: "a.chevalier@sunrise.ch", phone: "+41 78 890 12 34", tags: ["Client"], status: "Actif" },
-];
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Search, Filter, MoreHorizontal, Loader2, Trash2, Edit } from "lucide-react";
+import { useContacts, Contact } from "@/hooks/useContacts";
 
 const tagColors: Record<string, string> = {
   "VIP": "bg-primary/20 text-primary",
@@ -29,36 +35,87 @@ const tagColors: Record<string, string> = {
   "LCA": "bg-blue-600/20 text-blue-700",
   "3ème Pilier": "bg-purple-600/20 text-purple-700",
   "Auto": "bg-orange-600/20 text-orange-700",
-  "Client": "bg-green-600/20 text-green-700",
-  "Prospect": "bg-muted text-muted-foreground",
+  "client": "bg-green-600/20 text-green-700",
+  "prospect": "bg-muted text-muted-foreground",
+  "partenaire": "bg-blue-600/20 text-blue-700",
 };
 
 export default function Contacts() {
+  const { contacts, loading, addContact, deleteContact } = useContacts();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newContact, setNewContact] = useState({
+    civilite: "M.",
+    prenom: "",
+    nom: "",
+    email: "",
+    telephone: "",
+    type: "prospect" as const,
+    ville: "",
+  });
+
+  const filteredContacts = contacts.filter(contact => {
+    const q = searchQuery.toLowerCase();
+    return (
+      contact.nom?.toLowerCase().includes(q) ||
+      contact.prenom?.toLowerCase().includes(q) ||
+      contact.raison_sociale?.toLowerCase().includes(q) ||
+      contact.email?.toLowerCase().includes(q) ||
+      contact.ville?.toLowerCase().includes(q)
+    );
+  });
+
+  const handleAddContact = async () => {
+    if (!newContact.nom) return;
+    
+    await addContact({
+      ...newContact,
+      statut: "nouveau",
+      pays: "Suisse",
+    } as any);
+    
+    setNewContact({
+      civilite: "M.",
+      prenom: "",
+      nom: "",
+      email: "",
+      telephone: "",
+      type: "prospect",
+      ville: "",
+    });
+    setIsDialogOpen(false);
+  };
+
+  const handleDeleteContact = async (id: string) => {
+    if (confirm("Supprimer ce contact ?")) {
+      await deleteContact(id);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <TopHeader
         title="Clients"
-        subtitle="Gérez vos clients et prospects"
+        subtitle={`${contacts.length} contact${contacts.length > 1 ? 's' : ''}`}
         actions={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <Upload className="mr-2 h-4 w-4" />
-              Importer
-            </Button>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Nouveau client
-            </Button>
-          </div>
+          <Button size="sm" onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nouveau client
+          </Button>
         }
       />
 
-      <div className="flex-1 p-6 space-y-4">
-        {/* Search and Filters */}
+      <div className="flex-1 p-6 space-y-4 overflow-auto">
+        {/* Search */}
         <div className="flex items-center gap-4">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Rechercher un client..." className="pl-9" />
+            <Input 
+              placeholder="Rechercher un client..." 
+              className="pl-9" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
           <Button variant="outline" size="sm">
             <Filter className="mr-2 h-4 w-4" />
@@ -66,56 +123,168 @@ export default function Contacts() {
           </Button>
         </div>
 
-        {/* Contacts Table */}
-        <div className="rounded-lg border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <input type="checkbox" className="rounded border-gray-300" />
-                </TableHead>
-                <TableHead>Nom</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Téléphone</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {contacts.map((contact) => (
-                <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50">
-                  <TableCell>
-                    <input type="checkbox" className="rounded border-gray-300" />
-                  </TableCell>
-                  <TableCell className="font-medium">{contact.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{contact.email}</TableCell>
-                  <TableCell className="text-muted-foreground">{contact.phone}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 flex-wrap">
-                      {contact.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className={tagColors[tag] || "bg-gray-100"}>
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={contact.status === "Actif" ? "default" : "secondary"}>
-                      {contact.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+        {/* Loading */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : filteredContacts.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            {searchQuery ? "Aucun résultat" : "Aucun contact. Ajoutez votre premier client !"}
+          </div>
+        ) : (
+          /* Table */
+          <div className="rounded-lg border bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Téléphone</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Ville</TableHead>
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {filteredContacts.map((contact) => (
+                  <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50">
+                    <TableCell className="font-medium">
+                      {contact.raison_sociale 
+                        ? contact.raison_sociale 
+                        : `${contact.civilite || ''} ${contact.prenom || ''} ${contact.nom}`.trim()
+                      }
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {contact.email || "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {contact.telephone || contact.telephone_mobile || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className={tagColors[contact.type] || ""}>
+                        {contact.type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {contact.ville || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => handleDeleteContact(contact.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </div>
+
+      {/* Dialog Nouveau Contact */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau contact</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 gap-4">
+              <div>
+                <Label htmlFor="civilite">Civilité</Label>
+                <Select 
+                  value={newContact.civilite} 
+                  onValueChange={(v) => setNewContact({...newContact, civilite: v})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="M.">M.</SelectItem>
+                    <SelectItem value="Mme">Mme</SelectItem>
+                    <SelectItem value="Dr">Dr</SelectItem>
+                    <SelectItem value="Me">Me</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-3">
+                <Label htmlFor="type">Type</Label>
+                <Select 
+                  value={newContact.type} 
+                  onValueChange={(v: any) => setNewContact({...newContact, type: v})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="prospect">Prospect</SelectItem>
+                    <SelectItem value="client">Client</SelectItem>
+                    <SelectItem value="partenaire">Partenaire</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="prenom">Prénom *</Label>
+                <Input 
+                  id="prenom" 
+                  value={newContact.prenom}
+                  onChange={(e) => setNewContact({...newContact, prenom: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="nom">Nom *</Label>
+                <Input 
+                  id="nom" 
+                  value={newContact.nom}
+                  onChange={(e) => setNewContact({...newContact, nom: e.target.value})}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input 
+                id="email" 
+                type="email"
+                value={newContact.email}
+                onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="telephone">Téléphone</Label>
+                <Input 
+                  id="telephone" 
+                  value={newContact.telephone}
+                  onChange={(e) => setNewContact({...newContact, telephone: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="ville">Ville</Label>
+                <Input 
+                  id="ville" 
+                  value={newContact.ville}
+                  onChange={(e) => setNewContact({...newContact, ville: e.target.value})}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleAddContact} disabled={!newContact.nom}>
+              Ajouter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
