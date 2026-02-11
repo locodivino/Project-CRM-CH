@@ -2,20 +2,22 @@ import { ReactNode } from "react";
 
 interface TopHeaderProps {
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   actions?: ReactNode;
 }
 
 export function TopHeader({ title, subtitle, actions }: TopHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-6">
+    <div className="flex items-center justify-between px-6 py-4 border-b bg-background">
       <div>
         <h1 className="text-xl font-semibold">{title}</h1>
         {subtitle && (
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
+          typeof subtitle === 'string' 
+            ? <p className="text-sm text-muted-foreground">{subtitle}</p>
+            : <div className="text-sm">{subtitle}</div>
         )}
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
-    </header>
+      {actions && <div>{actions}</div>}
+    </div>
   );
 }

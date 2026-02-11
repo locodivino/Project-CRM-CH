@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Index from "./pages/Index";
 import Calendar from "./pages/Calendar";
 import Contacts from "./pages/Contacts";
+import ContactDetail from "./pages/ContactDetail";
 import Opportunities from "./pages/Opportunities";
 import Documents from "./pages/Documents";
 import Messenger from "./pages/Messenger";
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/contacts" element={<Contacts />} />
+              <Route path="/contacts/:id" element={<ContactDetail />} />
               <Route path="/opportunities" element={<Opportunities />} />
               <Route path="/documents" element={<Documents />} />
               <Route path="/messenger" element={<Messenger />} />

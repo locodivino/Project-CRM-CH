@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { TopHeader } from "@/components/layout/TopHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ const tagColors: Record<string, string> = {
 };
 
 export default function Contacts() {
+  const navigate = useNavigate();
   const { contacts, loading, addContact, deleteContact } = useContacts();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -50,7 +52,7 @@ export default function Contacts() {
     nom: "",
     email: "",
     telephone: "",
-    type: "prospect" as const,
+    type: "prospect" as "prospect" | "client" | "partenaire",
     ville: "",
   });
 
@@ -72,7 +74,7 @@ export default function Contacts() {
       ...newContact,
       statut: "nouveau",
       pays: "Suisse",
-    } as any);
+    } as Omit<Contact, "id" | "created_at" | "updated_at">);
     
     setNewContact({
       civilite: "M.",
@@ -148,7 +150,7 @@ export default function Contacts() {
               </TableHeader>
               <TableBody>
                 {filteredContacts.map((contact) => (
-                  <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50">
+                  <TableRow key={contact.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/contacts/${contact.id}`)}>
                     <TableCell className="font-medium">
                       {contact.raison_sociale 
                         ? contact.raison_sociale 
@@ -216,7 +218,7 @@ export default function Contacts() {
                 <Label htmlFor="type">Type</Label>
                 <Select 
                   value={newContact.type} 
-                  onValueChange={(v: any) => setNewContact({...newContact, type: v})}
+                  onValueChange={(v: "prospect" | "client" | "partenaire") => setNewContact({...newContact, type: v})}
                 >
                   <SelectTrigger>
                     <SelectValue />
