@@ -1,8 +1,29 @@
 # CHANGELOG — CRM Assurance Genève
 
 > Historique des phases de développement  
-> Repo : `Project-CRM-CH` (code React uniquement)  
-> Documentation complète : `../BD-CRM-VM_Ranchin.md` et `../CRM-Plan-Developpement.md`
+> Repo : `Project-CRM-CH`  
+> Documentation : `docs/` et `docs/ref/`
+
+---
+
+## [2.0-specs] — 2026-02-15 — Restructuration docs + Specs Comparateur
+
+### Organisation projet
+- Déplacement `docs/` dans le repo Git (Dev/) — imports CLAUDE.md simplifiés
+- Création `docs/ref/` pour les documents sources (BD-CRM, Plan Développement)
+- Mise à jour CLAUDE.md : chemins `@docs/` directs, ajout PRD Comparateur
+- Mise à jour 04-Architecture.md : nouvelle structure, tables Phase 2.0
+- Mise à jour 06-Development.md : phases 2.0a/b/c, statuts à jour
+- Mise à jour 02-Framework.md : ajout API Anthropic Claude (Comparateur)
+
+### Specs Comparateur d'offres (Phase 2.0)
+- Création `docs/03-PRD-Comparateur.md` — spécifications complètes
+- 3 nouvelles tables : `cga_documents`, `comparaisons`, `comparaison_offres`
+- 2 Storage buckets : `comparateur-offres`, `cga-documents`
+- Structure JSON d'extraction validée sur proposition Helvetia réelle
+- Architecture Edge Function + API Claude + RLS
+- Roadmap : Phase 2.0a (MVP) → 2.0b (CGA) → 2.0c (Courtier)
+- Document Word détaillé : CRM_Comparateur_Offres_Specs_v1.0.docx
 
 ---
 

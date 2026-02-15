@@ -6,12 +6,13 @@ Self-hosted sur VM ranchin.net (Supabase + n8n + Ollama).
 Stack : React 18 + TypeScript + Vite + shadcn/ui + Tailwind + Supabase
 
 ## Documentation
-- @../docs/01-Discovery.md — Vision, objectifs, métier assurance suisse
-- @../docs/02-Framework.md — Stack technique, URLs, dépendances
-- @../docs/04-Architecture.md — Infra VM, structure BD (8 tables), RLS, flux données
-- @../docs/06-Development.md — Conventions, scripts, phases, SQL utile
-- @../BD-CRM-VM_Ranchin.md — Référence complète BD (schémas SQL, données)
-- @../CRM-Plan-Developpement.md — Plan détaillé et historique phases
+- @docs/01-Discovery.md — Vision, objectifs, métier assurance suisse
+- @docs/02-Framework.md — Stack technique, URLs, dépendances
+- @docs/03-PRD-Comparateur.md — Specs Comparateur d'offres (Phase 2.0)
+- @docs/04-Architecture.md — Infra VM, structure BD, RLS, flux données
+- @docs/06-Development.md — Conventions, scripts, phases, SQL utile
+- @docs/ref/BD-CRM-VM_Ranchin.md — Référence complète BD (schémas SQL)
+- @docs/ref/CRM-Plan-Developpement.md — Plan détaillé et historique phases
 
 ## Commandes essentielles
 - `npm run dev` — Lance l'app sur localhost:5173
@@ -56,10 +57,10 @@ src/
 - Ne pas toucher aux tables ref_* sans script de migration versionné
 - Ne pas commit le fichier .env.local
 
-## État actuel — 11 février 2026
+## État actuel — 15 février 2026
 Phase 1.7 terminée : UI Contact + Polices fonctionnelle
-En test : Phase 1.7a — vérification interface par YMR
-Prochain : Phase 1.7b — corrections suite aux tests
+En cours : Specs Comparateur d'offres (Phase 2.0) — terminées
+Prochain : Phase 2.0a — MVP Comparateur (tables SQL + Edge Function + UI)
 
 ## Base de données
 - 183 contacts (142 personnes + 41 sociétés)
